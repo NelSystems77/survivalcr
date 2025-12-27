@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SURVIVAL CR - Prototipo</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body { background-color: #1a1c20; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // Definimos los iconos usando SVG directos para evitar dependencias complejas en este test
+        const IconCart = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>;
+        const IconShield = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>;
+        const IconTrash = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>;
+        const IconPhone = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>;
+        const IconUserPlus = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>;
+
+        const { useState } = React;
+
+        // --- DATOS SIMULADOS ---
+        const PRODUCTS_DB = [
+            { id: 1, name: "Brazalete Cobra 5-en-1", price: 6500, desc: "Paracord, brújula, silbato y pedernal." },
+            { id: 2, name: "Pedernal Táctico FireMaster", price: 4200, desc: "Iniciador de fuego magnesio + rascador." },
+            { id: 3, name: "Mini Cuchilla 'Neck Knife'", price: 8900, desc: "Acero inox, funda rígida para cuello." },
+            { id: 4, name: "Kit Pesca Supervivencia", price: 5500, desc: "Cápsula estanca con anzuelos y línea." },
+            { id: 5, name: "Llavero Monkey Fist", price: 3800, desc: "Defensa personal con núcleo de acero." },
+        ];
+
+        const WHATSAPP_NUMBER = "50687409343";
+
+        // --- COMPONENTE APP ---
+        function App() {
+            const [view, setView] = useState('store'); 
+            const [cart, setCart] = useState([]);
+            
+            // Estado Admin
+            const [admins, setAdmins] = useState([
+                { id: 1, name: "Admin Principal", email: "jefe@survival.cr", role: "superadmin", expires: "2099-12-31" },
+                { id: 2, name: "Vendedor Temporal", email: "ventas@survival.cr", role: "admin", expires: "2023-12-01" } 
+            ]);
+            const [newAdmin, setNewAdmin] = useState({ name: '', email: '', expires: '' });
+
+            // Funciones Carrito
+            const addToCart = (product) => {
+                setCart([...cart, product]);
+            };
+
+            const removeFromCart = (index) => {
+                const newCart = [...cart];
+                newCart.splice(index, 1);
+                setCart(newCart);
+            };
+
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+
+            const handleCheckout = () => {
+                const itemList = cart.map(i => `- ${i.name} (₡${i.price})`).join('%0A');
+                const msg = `Hola SURVIVAL CR, quiero comprar:%0A${itemList}%0ATotal: ₡${total}%0APago por SINPE Móvil.`;
+                window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, '_blank');
+            };
+
+            // Funciones Admin
+            const handleCreateAdmin = (e) => {
+                e.preventDefault();
+                const newId = admins.length + 1;
+                setAdmins([...admins, { ...newAdmin, id: newId, role: 'admin' }]);
+                setNewAdmin({ name: '', email: '', expires: '' });
+                alert("Administrador creado con éxito.");
+            };
+            
+            const isExpired = (dateString) => new Date(dateString) < new Date();
+
+            return (
+                <div className="min-h-screen bg-[#1a1c20] text-gray-100 font-sans pb-10">
+                    
+                    {/* NAVBAR */}
+                    <nav className="sticky top-0 z-50 bg-[#1a1c20]/95 backdrop-blur border-b border-gray-800 px-4 h-16 flex items-center justify-between shadow-lg">
+                        <div onClick={() => setView('store')} className="font-black text-xl text-white tracking-tighter cursor-pointer flex items-center gap-2">
+                            <span className="text-2xl">☠️</span> SURVIVAL <span className="text-green-500">CR</span>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <button onClick={() => setView('admin')} className="text-gray-500 hover:text-orange-500" title="Zona Admin">
+                                <IconShield />
+                            </button>
+                            <button onClick={() => setView('cart')} className="relative text-white hover:text-green-400">
+                                <IconCart />
+                                {cart.length > 0 && (
+                                    <span className="absolute -top-2 -right-2 bg-orange-600 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center animate-bounce">
+                                        {cart.length}
+                                    </span>
+                                )}
+                            </button>
+                        </div>
+                    </nav>
+
+                    {/* VISTA TIENDA */}
+                    {view === 'store' && (
+                        <div className="animate-fade-in">
+                            <div className="bg-gradient-to-b from-green-900/50 to-transparent py-16 px-4 text-center">
+                                <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">EQUIPAMIENTO TÁCTICO</h1>
+                                <p className="text-green-400 uppercase tracking-widest text-sm">Supervivencia • Jungla • Artesanal</p>
+                            </div>
+                            
+                            <div className="max-w-6xl mx-auto p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {PRODUCTS_DB.map((product) => (
+                                    <div key={product.id} className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-green-600 transition-all hover:shadow-lg hover:shadow-green-900/20 group">
+                                        <div className="h-52 bg-gray-900 flex items-center justify-center relative overflow-hidden">
+                                           <div className="text-6xl group-hover:scale-110 transition-transform duration-500">
+                                             {product.id === 1 ? '🐍' : product.id === 2 ? '🔥' : product.id === 3 ? '🔪' : product.id === 4 ? '🎣' : '👊'}
+                                           </div>
+                                        </div>
+                                        <div className="p-5">
+                                            <h3 className="text-white font-bold text-xl">{product.name}</h3>
+                                            <p className="text-gray-400 text-sm mt-1 mb-4 h-10">{product.desc}</p>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-2xl font-bold text-green-400">₡{product.price}</span>
+                                                <button onClick={() => addToCart(product)} className="bg-white hover:bg-gray-200 text-black font-bold py-2 px-6 rounded-lg uppercase text-sm tracking-wider active:scale-95 transition-transform">
+                                                    Agregar
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* VISTA CARRITO */}
+                    {view === 'cart' && (
+                        <div className="max-w-2xl mx-auto p-4 mt-8">
+                            <h2 className="text-2xl font-bold mb-6 border-b border-gray-700 pb-2">Tu Mochila ({cart.length})</h2>
+                            {cart.length === 0 ? (
+                                <div className="text-center py-12 bg-gray-800 rounded-xl border border-dashed border-gray-600">
+                                    <p className="text-gray-400 text-lg">No llevas equipo todavía.</p>
+                                    <button onClick={() => setView('store')} className="mt-4 text-green-400 underline">Volver al catálogo</button>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {cart.map((item, idx) => (
+                                        <div key={idx} className="bg-gray-800 p-4 rounded-lg flex justify-between items-center border border-gray-700">
+                                            <span className="font-medium">{item.name}</span>
+                                            <div className="flex items-center gap-4">
+                                                <span className="text-green-400 font-bold">₡{item.price}</span>
+                                                <button onClick={() => removeFromCart(idx)} className="text-red-500 hover:text-red-400 p-2 hover:bg-gray-700 rounded">
+                                                    <IconTrash />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    
+                                    <div className="mt-8 bg-gray-900 p-6 rounded-xl border border-green-800/50">
+                                        <div className="flex justify-between text-xl font-bold mb-4">
+                                            <span>Total:</span>
+                                            <span className="text-green-400">₡{total}</span>
+                                        </div>
+                                        <p className="text-gray-400 text-sm mb-4">Se abrirá WhatsApp con tu pedido listo.</p>
+                                        <button onClick={handleCheckout} className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl text-lg flex items-center justify-center gap-3 shadow-lg shadow-green-900/50 hover:-translate-y-1 transition-all">
+                                            <IconPhone /> Confirmar Orden por SINPE
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* VISTA ADMIN */}
+                    {view === 'admin' && (
+                        <div className="max-w-4xl mx-auto p-4 mt-8">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-2xl font-bold text-orange-500 flex items-center gap-2"><IconShield /> Panel Super Admin</h2>
+                                <button onClick={() => setView('store')} className="text-sm text-gray-400 underline">Cerrar Sesión</button>
+                            </div>
+
+                            <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 mb-8 shadow-xl">
+                                <h3 className="font-bold mb-4 text-lg flex items-center gap-2 text-white"><IconUserPlus /> Crear Nuevo Admin</h3>
+                                <form onSubmit={handleCreateAdmin} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <input required type="text" placeholder="Nombre completo" className="bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-green-500 focus:outline-none" value={newAdmin.name} onChange={e => setNewAdmin({...newAdmin, name: e.target.value})} />
+                                    <input required type="email" placeholder="Correo electrónico" className="bg-gray-900 border border-gray-600 p-3 rounded text-white focus:border-green-500 focus:outline-none" value={newAdmin.email} onChange={e => setNewAdmin({...newAdmin, email: e.target.value})} />
+                                    <div className="md:col-span-2">
+                                        <label className="text-xs text-gray-400 ml-1">Fecha de Caducidad del Perfil:</label>
+                                        <input required type="date" className="w-full bg-gray-900 border border-gray-600 p-3 rounded text-white mt-1 focus:border-green-500 focus:outline-none" value={newAdmin.expires} onChange={e => setNewAdmin({...newAdmin, expires: e.target.value})} />
+                                    </div>
+                                    <button className="md:col-span-2 bg-orange-600 hover:bg-orange-500 text-white font-bold p-3 rounded mt-2 transition-colors">Otorgar Permisos de Admin</button>
+                                </form>
+                            </div>
+
+                            <h3 className="font-bold mb-4 text-xl">Gestión de Accesos</h3>
+                            <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+                                <table className="w-full text-left">
+                                    <thead className="bg-gray-900 text-gray-400 text-sm uppercase">
+                                        <tr>
+                                            <th className="p-4">Nombre</th>
+                                            <th className="p-4">Rol</th>
+                                            <th className="p-4">Vencimiento</th>
+                                            <th className="p-4">Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-700">
+                                        {admins.map(admin => (
+                                            <tr key={admin.id} className="hover:bg-gray-750">
+                                                <td className="p-4 font-medium">{admin.name}</td>
+                                                <td className="p-4 text-sm text-gray-400">{admin.role}</td>
+                                                <td className="p-4 text-sm font-mono">{admin.expires}</td>
+                                                <td className="p-4">
+                                                    {isExpired(admin.expires) ? 
+                                                        <span className="bg-red-900/50 text-red-200 px-3 py-1 rounded-full text-xs font-bold border border-red-800">CADUCADO</span> : 
+                                                        <span className="bg-green-900/50 text-green-200 px-3 py-1 rounded-full text-xs font-bold border border-green-800">ACTIVO</span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
